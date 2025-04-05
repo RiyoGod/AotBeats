@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -e
+
+# Define colors
+GREEN='\033[1;32m'
+PINK='\033[1;35m'
+NC='\033[0m' # No Color
+
+# Print header
+echo -e "${GREEN}⟪ ᴀᴏᴛ ᴘᴀᴄᴋᴀɢᴇꜱ ɪɴꜱᴛᴀʟʟᴇʀ !! ⟫${NC}"
+sleep 1
+
+echo -e "${PINK}→ Updating system packages...${NC}"
+sudo apt update && sudo apt install -y git curl python3-pip ffmpeg tmux nano
+
+echo -e "${PINK}→ Installing NVM...${NC}"
+curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+source "$NVM_DIR/nvm.sh"
+
+echo -e "${PINK}→ Installing Node.js via NVM...${NC}"
+nvm install node
+
+echo -e "${PINK}→ Running system upgrade...${NC}"
+sudo apt-get update && sudo apt-get upgrade -y
+
+echo -e "${PINK}→ Installing/upgrading pip and ffmpeg...${NC}"
+sudo apt-get install -y python3-pip ffmpeg
+sudo pip3 install -U pip
+
+echo -e "${PINK}→ Installing Node.js v18 from NodeSource...${NC}"
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm i -g npm
+
+echo -e "${PINK}→ Installing Python requirements...${NC}"
+pip3 install -U -r requirements.txt
+
+echo -e "${PINK}→ Running project setup...${NC}"
+sudo bash setup
