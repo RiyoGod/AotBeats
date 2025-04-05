@@ -1,31 +1,53 @@
-from telegraph import upload_file
+
+import os
+import requests
 from pyrogram import filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from AotBeats import app
-from pyrogram.types import InputMediaPhoto
 
+def upload_file(file_path):
+    url = "https://catbox.moe/user/api.php"
+    files = {"fileToUpload": open(file_path, "rb")}
+    response = requests.post(url, data={"reqtype": "fileupload", "json": "true"}, files=files)
+    return (response.status_code == 200, response.text.strip() if response.status_code == 200 else f"Error: {response.status_code} - {response.text}")
 
-@app.on_message(filters.command(["tgm" , "telegraph"]))
-def ul(_, message):
-    reply = message.reply_to_message
-    if reply.media:
-        i = message.reply("𝐌𝙰𝙺𝙴 𝐀 𝐋𝙸𝙽𝙺...")
-        path = reply.download()
-        fk = upload_file(path)
-        for x in fk:
-            url = "https://telegra.ph" + x
+@app.on_message(filters.command(["tgm", "tgt", "telegraph"]))
+async def get_link_group(client, message):
+    if not message.reply_to_message:
+        return await message.reply_text("❍ Please reply to a media to upload on Telegraph.")
 
-        i.edit(f'Yᴏᴜʀ ʟɪɴᴋ sᴜᴄᴄᴇssғᴜʟ Gᴇɴ {url}')
+    media = message.reply_to_message
+    file_size = getattr(media, 'photo', None) or getattr(media, 'video', None) or getattr(media, 'document', None)
+    if file_size and file_size.file_size > 200 * 1024 * 1024:
+        return await message.reply_text("Please provide a media file under 200MB.")
 
-########____________________________________________________________######
+    text = await message.reply("**◆ ᴘʀᴏᴄᴇssɪɴɢ...**")
 
-@app.on_message(filters.command(["graph" , "grf"]))
-def ul(_, message):
-    reply = message.reply_to_message
-    if reply.media:
-        i = message.reply("𝐌𝙰𝙺𝙴 𝐀 𝐋𝙸𝙽𝙺...")
-        path = reply.download()
-        fk = upload_file(path)
-        for x in fk:
-            url = "https://graph.org" + x
+    async def progress(current, total):
+        try:
+            await text.edit_text(f"**◆ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...** {current * 100 / total:.1f}%")
+        except Exception:
+            pass
 
-        i.edit(f'Yᴏᴜʀ ʟɪɴᴋ sᴜᴄᴄᴇssғᴜʟ Gᴇɴ {url}')
+    try:
+        local_path = await media.download(progress=progress)
+        await text.edit_text("**◆ ᴜᴘʟᴏᴀᴅɪɴɢ ᴛᴏ [ᴍʏ ᴅᴀᴛᴀʙᴀsᴇ](t.me/AotBeatsBot).**")
+        success, upload_path = upload_file(local_path)
+
+        if success:
+            await text.edit_text(
+                f"❍ | [ᴛᴀᴘ ʜᴇʀᴇ ǫᴛ]({upload_path})",
+                reply_markup=InlineKeyboardMarkup(
+                    [[InlineKeyboardButton("❍ sᴜᴄᴄᴇssғᴜʟʟʏ ᴜᴘʟᴏᴀᴅᴇᴅ ɪɴ ᴍʏ ᴅᴀᴛᴀʙᴀsᴇ ❍", url=upload_path)]]
+                ),
+            )
+        else:
+            await text.edit_text(f"❍ An error occurred while uploading your file\n{upload_path}")
+
+        os.remove(local_path)
+    except Exception as e:
+        await text.edit_text(f"❍ File upload failed\n\n❍ <i>Reason: {e}</i>")
+        try:
+            os.remove(local_path)
+        except Exception:
+            pass
