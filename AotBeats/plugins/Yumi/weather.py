@@ -1,6 +1,5 @@
 from pyrogram import Client, filters
-from AotBeats import app
-
+from AotBeats import app  # Keep normal import, only text will be styled
 
 @app.on_message(filters.command("weather"))
 def weather(client, message):
@@ -11,7 +10,7 @@ def weather(client, message):
         weather_url = f"https://wttr.in/{location}.png"
         
         # Reply with the weather information as a photo
-        message.reply_photo(photo=weather_url, caption="Here's the weather for your location")
+        message.reply_photo(photo=weather_url, caption="**ʜᴇʀᴇ'ꜱ ᴛʜᴇ ᴡᴇᴀᴛʜᴇʀ ꜰᴏʀ ʏᴏᴜʀ ʟᴏᴄᴀᴛɪᴏɴ — ᴀᴏᴛʙᴇᴀᴛs**")
     except IndexError:
         # User didn't provide a location
-        message.reply_text("Please provide a location. Use /weather NEW YORK")
+        message.reply_text("**ᴘʟᴇᴀꜱᴇ ᴘʀᴏᴠɪᴅᴇ ᴀ ʟᴏᴄᴀᴛɪᴏɴ. ᴜꜱᴇ /ᴡᴇᴀᴛʜᴇʀ ɴᴇᴡ ʏᴏʀᴋ — ᴀᴏᴛʙᴇᴀᴛs**")
